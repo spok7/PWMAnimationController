@@ -4,8 +4,19 @@
 #define RUNNABLETASK_H
 
 
-class RunnableTask {
+enum TaskType {
+	PWM,
+	PIN,
+	DELAY,
+	STEPPER
+};
+
+class RunnableTask
+{
+	protected:
+		TaskType type;
 	public:
+		TaskType getType();
 		virtual bool run();
 };
 
@@ -48,6 +59,56 @@ class PinTask : public RunnableTask
 		uint8_t value;
 	public:
 		PinTask(uint8_t pin, uint8_t value);
+		bool run();
+};
+
+class StepperTask : public RunnableTask
+{
+	private:
+		uint8_t step_pin;
+		uint8_t dir_pin;
+		bool new_sequence;
+
+		struct StepperSequence {
+			uint8_t step_delay;
+			unsigned long last_run_time;
+			bool reverse_dir;
+			StepperSequence *next;
+			virtual bool setup(uint8_t step_pin, uint8_t dir_pin);
+			virtual bool isDone();
+			StepperSequence(bool d, uint8_t sd);
+		};
+
+	protected:
+		StepperSequence *root_link;
+		StepperSequence *current_link;
+
+		struct StepperCountSequence : StepperSequence {
+			uint8_t amount;
+			uint8_t current_step;
+
+			bool setup(uint8_t step_pin, uint8_t dir_pin);
+			bool isDone();
+			StepperCountSequence(uint8_t a, bool d, uint8_t sd);
+		};
+
+		struct StepperSenseSequence : StepperSequence {
+			uint8_t sensor_pin;
+			uint8_t value;
+			bool increaseSensorToValue;
+
+			bool setup(uint8_t step_pin, uint8_t dir_pin);
+			bool isDone();
+
+			StepperSenseSequence(uint8_t v, bool isv, bool d, uint8_t sd);
+		};
+
+		void step(StepperSequence *seq);
+
+	public:
+		StepperTask(uint8_t step_pin, uint8_t dir_pin);
+		void addStepAmount(uint8_t amount, bool reverse_dir, uint16_t step_delay);
+		void addStepUntil(uint8_t analogPin, uint16_t analogValue, bool reverse_dir, uint16_t step_delay);
 		bool run();
 };
 

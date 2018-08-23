@@ -12,19 +12,13 @@ class Animation : public RunnableTask {
 
 class AnimationChain : public Animation {
 	private:
-		struct Event {
+		struct TaskLink {
 			RunnableTask *task;
-			Event *next;
-			Event(RunnableTask *t) : task(t), next(NULL) {}
+			TaskLink *next;
+			TaskLink(RunnableTask *t) : task(t), next(NULL) {}
 		};
-		Event *root_event, *current_event;
-		struct PWMDevice {
-			PWMTask *controller;
-			PWMDevice *next;
-			PWMDevice(PWMTask *c) : controller(c), next(NULL) {}
-		};
-		PWMDevice *root_device;
-		void appendTask(RunnableTask *event);
+		TaskLink *root_task, *current_task;
+		void appendTask(RunnableTask *task);
 	public:
 		AnimationChain();
 		void addPWM(PWMHandler *pwm, uint16_t pos, float speed);	// bounds for pos depend on handler; lowest speed is 0.0626

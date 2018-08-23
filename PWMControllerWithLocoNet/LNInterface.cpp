@@ -173,7 +173,7 @@ void LNInterface::update()
 			if (traversal->running && !(traversal->running = traversal->ani->run()) && Throttle.getFunction(traversal->func_num) != 0) {
 				traversal->running = true;
 			}
-		} while (traversal = traversal->next);
+		} while ((traversal = traversal->next));
 	}
 
 	if (buttons_root) {											// run through all buttons and update LocoNet accordingly
@@ -183,12 +183,12 @@ void LNInterface::update()
 				Throttle.setFunction(traversal->fn, 1);
 				// Serial.println(traversal->fn);
 			}
-		} while (traversal = traversal->next);
+		} while ((traversal = traversal->next));
 	}
 }
 
 // set a function's state to running if a function is turned on
-static void LNInterface::updateFunction(uint8_t Function, uint8_t Value)
+void LNInterface::updateFunction(uint8_t Function, uint8_t Value)
 {
 	if (Value != 0 && functions_map[Function]) {
 		functions_map[Function]->running = true;
@@ -197,7 +197,7 @@ static void LNInterface::updateFunction(uint8_t Function, uint8_t Value)
 }
 
 // turn everything off if the direction is reverse
-static void LNInterface::updateOnOff(uint16_t Direction) {
+void LNInterface::updateOnOff(uint16_t Direction) {
 	if (Direction) {
 		for (FunctionNode *traversal = functions_root; traversal; traversal = traversal->next) traversal->ani->killPWM();
 		Serial.println(F(" LN: Disabled."));

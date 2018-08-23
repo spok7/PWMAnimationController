@@ -1,25 +1,24 @@
 #include "Animation.h"
 
 
-// add task to chain of events
+// add task to chain of TaskLinks
 void AnimationChain::appendTask(RunnableTask *task)
 {
-	if (!root_event) {
-		root_event = new Event(task);
-		current_event = root_event;
+	if (!root_task) {
+		root_task = new TaskLink(task);
+		current_task = root_task;
 	} else {
-		Event *traversal = root_event;
+		TaskLink *traversal = root_task;
 		while (traversal->next) traversal = traversal->next;
-		traversal->next = new Event(task);
+		traversal->next = new TaskLink(task);
 	}
-	Serial.println(F("  AC: Appended Event"));
+	Serial.println(F("  AC: Appended TaskLink"));
 }
 
 AnimationChain::AnimationChain()
 {
-	root_event = NULL;
-	current_event = NULL;
-	root_device = NULL;
+	root_task = NULL;
+	current_task = NULL;
 	Serial.println(F("  AC: Initialized AnimationChain"));
 }
 
@@ -27,19 +26,17 @@ AnimationChain::AnimationChain()
 void AnimationChain::addPWM(PWMHandler *pwm, uint16_t pos, float speed)
 {
 	Serial.println(F("  AC: Adding PWM"));
-	if (!root_device) {
-		root_device = new PWMDevice(new PWMTask(pwm));
-		root_device->controller->addSequence(pos, speed);
-		appendTask(root_device->controller);
+	if (!root_task) {
+		root_task = new TaskLink(new PWMTask(pwm));
+		((PWMTask *) root_task->task)->addSequence(pos, speed);
 	} else {
-		PWMDevice *traversal = root_device;
+		TaskLink *traversal = root_task;
 
-		do if (traversal->controller->getHandler() == pwm) break;
-		while (traversal = traversal->next);
+		do if (traversal->task->getType() == PWM && ((PWMTask *) traversal->task)->getHandler() == pwm) break;
+		while ((traversal = traversal->next));
 
-		if (!traversal) traversal = new PWMDevice(new PWMTask(pwm));
-		traversal->controller->addSequence(pos, speed);
-		appendTask(traversal->controller);
+		if (!traversal) traversal = new TaskLink(new PWMTask(pwm));
+		((PWMTask *) traversal->task)->addSequence(pos, speed);
 	}
 }
 
@@ -57,24 +54,24 @@ void AnimationChain::addPin(uint8_t pin, uint8_t value)
 	appendTask(new PinTask(pin, value));
 }
 
-// adds an existing animation as a task to the event list
+// adds an existing animation as a task to the TaskLink list
 void AnimationChain::addAnimation(Animation *ani)
 {
 	Serial.println(F("  AC: Adding Animation"));
 	appendTask(ani);
 }
 
-// runs the animation, returns false when no more moves events are left to run
+// runs the animation, returns false when no more moves TaskLinks are left to run
 bool AnimationChain::run()
 {
-	if (!current_event) current_event = root_event;
-	return (current_event->task->run() || (current_event = current_event->next));
+	if (!current_task) current_task = root_task;
+	return (current_task->task->run() || (current_task = current_task->next));
 }
 
 // disables all pwm values
 void AnimationChain::killPWM() {
 	Serial.println(F("  AC: Killing All PWM Values"));
-	for (PWMDevice *traversal = root_device; traversal; traversal = traversal->next) traversal->controller->kill();
+	for (TaskLink *traversal = root_task; traversal; traversal = traversal->next) ((PWMTask *) traversal->task)->kill();
 }
 
 
@@ -88,7 +85,7 @@ AnimationNode::AnimationNode()
 }
 
 // adds an existing animation as a task to its respective linked list
-void AnimationNode::addAnimation(Animation *ani, bool loopable = false)
+void AnimationNode::addAnimation(Animation *ani, bool loopable)
 {
 	if (loopable) {
 		if (!loopable_root) {

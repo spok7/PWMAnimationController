@@ -1,0 +1,28 @@
+PWM Animation Library
+
+This library was made to help create servo animations quickly and easily. It does so through passing object pointers through the hierarchy of object displayed below.
+
+How to use:
+
+1. Declare a pointer to a non initialized LNInterface object (controller) as a class variable
+	this will manage all LocoNet and button interactions
+2. In the setup method, declare a pointer to an initialized Adafruit_PWMServoDriver object
+3. Run the begin() and setPWMFreq(60) methods
+	60 is default for analog servos
+4. Create pointers to different PWM handlers
+5. Create animation chains
+	a. Pass in handlers to the addPWM method, along with position and speed parameters
+	b. Add pin events
+	c. Add delays
+6. Add animations to chains to make them run in series, or add animations to nodes to make them run in parallel
+7. Initialize the LNInterface controller
+8. Map the animations to the desired decoder funcitons
+9. Map buttons (pin inputs) to derised decoder functions as necessary
+10. Run the update function in main loop
+
+
+SimpleServo.ino explained
+-	The controller pointer is set as a class variable to be accessible from the setup and the loop.
+-	The servo driver is set as usual (though it is a pointer), to the first I2C address, and set to update on a 60Hz interval (default for analog servos).
+-	A ServoHandler object is declared on pin one, with no offset, and with the driver declared above.
+-	A new AnimationChain is created to store a simple servo animation

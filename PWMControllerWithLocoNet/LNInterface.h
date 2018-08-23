@@ -28,7 +28,7 @@ class LNInterface
 
 		static bool is_disabled;
 		uint8_t period;
-		long target_time;
+		unsigned long target_time;
 
 		lnMsg *LnPacket;
 		static LocoNetThrottleClass Throttle;
