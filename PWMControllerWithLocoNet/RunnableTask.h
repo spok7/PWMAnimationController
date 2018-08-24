@@ -107,6 +107,8 @@ class StepperTask : public RunnableTask
 
 	public:
 		StepperTask(uint8_t step_pin, uint8_t dir_pin);
+		uint8_t getStepPin();
+		uint8_t getDirPin();
 		void addStepAmount(uint8_t amount, bool reverse_dir, uint16_t step_delay);
 		void addStepUntil(uint8_t analogPin, uint16_t analogValue, bool reverse_dir, uint16_t step_delay);
 		bool run();

@@ -40,18 +40,72 @@ void AnimationChain::addPWM(PWMHandler *pwm, uint16_t pos, float speed)
 	}
 }
 
-// creates and adds a delay task with the given parameters
+// creates and adds a Delay task with the given parameters
 void AnimationChain::addDelay(long delay)
 {
 	Serial.println(F("  AC: Adding Delay"));
 	appendTask(new DelayTask(delay));
 }
 
-// creates and adds a pin task with the given parameters
+// creates and adds a PIN task with the given parameters
 void AnimationChain::addPin(uint8_t pin, uint8_t value)
 {
 	Serial.println(F("  AC: Adding Pin"));
 	appendTask(new PinTask(pin, value));
+}
+
+// creates and adds a stepper count task with the given parameters
+void AnimationChain::addStepper(uint8_t step_pin, uint8_t dir_pin, uint16_t step_amount, bool reverse_dir, uint16_t step_delay)
+{
+	Serial.println(F("  AC: Adding Stepper"));
+	if (!root_task) {
+		root_task = new TaskLink(new StepperTask(step_pin, dir_pin));
+		((StepperTask *) root_task->task)->addStepAmount(step_amount, reverse_dir, step_delay);
+	} else {
+		TaskLink *traversal = root_task;
+
+		do
+			if (traversal->task->getType() == STEPPER) {
+
+				StepperTask *temp = ((StepperTask *) traversal->task);
+
+				// if both pins match, add the sequence to that link
+				if (temp->getStepPin() && temp->getDirPin()) break;
+				// if only one of the pins matches, don't create a task
+				if (temp->getStepPin() != temp->getDirPin()) return;
+			}
+		while ((traversal = traversal->next));
+
+		if (!traversal) traversal = new TaskLink(new StepperTask(step_pin, dir_pin));
+		((PWMTask *) traversal->task)->addStepAmount(step_amount, reverse_dir, step_delay);
+	}
+}
+
+// creates and adds a stepper sensor task with the given parameters
+void AnimationChain::addStepperWithSensor(uint8_t step_pin, uint8_t dir_pin, uint8_t sensor_pin, uint8_t target_value, bool reverse_dir, uint16_t step_delay)
+{
+	Serial.println(F("  AC: Adding Stepper"));
+	if (!root_task) {
+		root_task = new TaskLink(new StepperTask(step_pin, dir_pin));
+		((StepperTask *) root_task->task)->addStepUntil(sensor_pin, target_value, reverse_dir, step_delay);
+	} else {
+		TaskLink *traversal = root_task;
+
+		do
+			if (traversal->task->getType() == STEPPER) {
+
+				StepperTask *temp = ((StepperTask *) traversal->task);
+
+				// if both pins match, add the sequence to that link
+				if (temp->getStepPin() && temp->getDirPin()) break;
+				// if only one of the pins matches, don't create a task
+				if (temp->getStepPin() != temp->getDirPin()) return;
+			}
+		while ((traversal = traversal->next));
+
+		if (!traversal) traversal = new TaskLink(new StepperTask(step_pin, dir_pin));
+		((PWMTask *) traversal->task)->addStepUntil(sensor_pin, target_value, reverse_dir, step_delay);
+	}
 }
 
 // adds an existing animation as a task to the TaskLink list

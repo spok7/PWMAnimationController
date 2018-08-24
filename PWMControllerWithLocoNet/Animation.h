@@ -24,6 +24,8 @@ class AnimationChain : public Animation {
 		void addPWM(PWMHandler *pwm, uint16_t pos, float speed);	// bounds for pos depend on handler; lowest speed is 0.0626
 		void addDelay(long delay);
 		void addPin(uint8_t pin, uint8_t value);					// pin must be valid on board, value is either HIGH or LOW
+		void addStepper(uint8_t step_pin, uint8_t dir_pin, uint8_t amount, bool reverse_dir, uint16_t step_delay);			// both pins must be unique to one Stepper else no task is created
+		void addStepperWithSensor(uint8_t step_pin, uint8_t dir_pin, uint8_t sensor_pin, uint8_t target_value, bool reverse_dir, uint16_t step_delay);
 		void addAnimation(Animation *ani);
 
 		bool run();													// do not use locally
