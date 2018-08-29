@@ -38,11 +38,12 @@ void LNInterface::lnUpdate()
 // use 16 as a good period to get 62.5 updates per second
 LNInterface::LNInterface(uint8_t tx_pin, uint16_t loco_address, uint8_t period)
 {
+	Serial.print(F(" LNI: Creating Interface"));
 	LocoNet.init(tx_pin);
 	Throttle.init(0, 0, loco_address);
 
 	// attempt to initialize onto existing address
-	Serial.println(" LNI: Stealing Address");
+	Serial.println(F(" LNI: Stealing Address"));
 	Throttle.stealAddress(loco_address);
 	lnUpdate();     // repeated to process possible errors,
 	lnUpdate();     // do not remove duplicate line

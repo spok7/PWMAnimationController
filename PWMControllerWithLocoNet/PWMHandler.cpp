@@ -110,7 +110,7 @@ void AdafruitPWMHandler::kill() {
 // }
 
 
-static ArduinoPWMHandler* HandlerFactory::createArduinoPWMHandler(HandlerType type, uint8_t pin, uint16_t offset) {
+ArduinoPWMHandler* HandlerFactory::createArduinoPWMHandler(HandlerType type, uint8_t pin, uint16_t offset) {
 	ArduinoPWMHandler *handler = NULL;
 	switch (type) {
 	    case SERVO:
@@ -125,7 +125,7 @@ static ArduinoPWMHandler* HandlerFactory::createArduinoPWMHandler(HandlerType ty
 	return handler;
 }
 
-static AdafruitPWMHandler* HandlerFactory::createAdafruitPWMHandler(HandlerType type, uint8_t pin, uint16_t offset, Adafruit_PWMServoDriver *driver) {
+AdafruitPWMHandler* HandlerFactory::createAdafruitPWMHandler(HandlerType type, uint8_t pin, uint16_t offset, Adafruit_PWMServoDriver *driver) {
 	AdafruitPWMHandler *handler = NULL;
 	switch (type) {
 	    case SERVO:

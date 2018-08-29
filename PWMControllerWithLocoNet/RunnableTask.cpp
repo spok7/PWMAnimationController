@@ -142,9 +142,9 @@ StepperTask::StepperSequence::StepperSequence(bool d, uint8_t sd) : reverse_dir(
 bool StepperTask::StepperCountSequence::setup(uint8_t step_pin, uint8_t dir_pin)
 {
 	digitalWrite(dir_pin, (reverse_dir ? HIGH : LOW));
-	delay(1);
+	delayMicroseconds(500);
 	digitalWrite(step_pin, HIGH);
-	delay(1);
+	delayMicroseconds(500);
 	digitalWrite(step_pin, LOW);
 	return false;
 }
@@ -168,7 +168,7 @@ bool StepperTask::StepperSenseSequence::setup(uint8_t step_pin, uint8_t dir_pin)
 	uint8_t sensor_val = analogRead(sensor_pin);
 	if (sensor_val >= value) increaseSensorToValue = false;
 	digitalWrite(step_pin, HIGH);
-	delay(1);
+	delayMicroseconds(500);
 	digitalWrite(step_pin, LOW);
 	uint8_t sensor_val2 = analogRead(sensor_pin);
 	return ((value < sensor_val && sensor_val < sensor_val2) || (value > sensor_val && sensor_val > sensor_val2));
@@ -189,10 +189,24 @@ StepperTask::StepperTask(uint8_t step_pin, uint8_t dir_pin)
 	this->root_link = NULL;
 	this->current_link = NULL;
 	this->type = STEPPER;
+
+	Serial.println(F("   R: StepperTask Created"));
+}
+
+uint8_t StepperTask::getStepPin()
+{
+	return this->step_pin;
+}
+
+uint8_t StepperTask::getDirPin()
+{
+	return this->dir_pin;
 }
 
 void StepperTask::addStepAmount(uint8_t amount, bool reverse_dir, uint16_t step_delay)
 {
+	Serial.println(F("   R: Adding StepAmount Task"));
+
 	if (!root_link) {
 		root_link = new StepperCountSequence(amount, reverse_dir, step_delay);
 		current_link = root_link;
@@ -201,10 +215,14 @@ void StepperTask::addStepAmount(uint8_t amount, bool reverse_dir, uint16_t step_
 		while (traversal->next) traversal = traversal->next;
 		traversal->next = new StepperCountSequence(amount, reverse_dir, step_delay);
 	}
+
+	Serial.println(F("   R: StepAmount Task Added"));
 }
 
 void StepperTask::addStepUntil(uint8_t analogPin, uint16_t analogValue, bool reverse_dir, uint16_t step_delay)
 {
+	Serial.println(F("   R: Adding StepUntil Task"));
+
 	if (!root_link) {
 		root_link = new StepperSenseSequence(analogPin, analogValue, reverse_dir, step_delay);
 		current_link = root_link;
@@ -219,7 +237,7 @@ void StepperTask::step(StepperSequence *seq)
 {
 	if (seq->last_run_time + seq->step_delay <= millis()) {
 		digitalWrite(step_pin, HIGH);
-		delay(1);
+		delayMicroseconds(500);
 		digitalWrite(step_pin, LOW);
 	}
 

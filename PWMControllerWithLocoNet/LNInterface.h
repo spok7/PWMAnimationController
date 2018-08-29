@@ -1,5 +1,6 @@
 #include "Animation.h"
 #include <LocoNet.h>
+#include <MemoryFree.h>
 
 #ifndef LNINTERFACE_H
 #define LNINTERFACE_H
