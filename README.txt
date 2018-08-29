@@ -17,5 +17,3 @@ Todo:
 - improve waterfall stuff, such as colours (other project)
 - add example for a more difficult implementation that uses addAnimation in both nodes and chains
 - the documentation was written using draw.io; import the .xml into the website to edit it
-
-Contact m.szpakowicz@mail.utoronto.ca for assistance.
